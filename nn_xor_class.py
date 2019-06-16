@@ -59,7 +59,7 @@ class NeuralNetwork(object):
         else:
             return np.where(Z > 0, Z, Z * 0.01)
 
-    ''' loss and cost functions '''
+    ''' Loss and Cost functions '''
     def computeLoss(self, A):
         return (self.trainingLabels * np.log(A) + (1 - self.trainingLabels) * np.log(1 - A))
 
@@ -89,12 +89,12 @@ class NeuralNetwork(object):
 
         parameters = {}
 
-        # create weights and biais for each hidden layers
+        # Create weights and biais for each hidden layers
         for i in range(1, self.numLayers):
             parameters['W' + str(i)] = np.random.randn(self.numUnits[i], self.numUnits[i-1])
             parameters['b' + str(i)] = np.ones((self.numUnits[i], 1))
 
-        # create weight and biais for the final output layer
+        # Create weight and biais for the final output layer
         parameters['W' + str(self.numLayers)] = np.random.randn(1, self.numUnits[-2])
         parameters['b' + str(self.numLayers)] = np.ones((1,1))
 
@@ -126,14 +126,14 @@ class NeuralNetwork(object):
     def backwardPass(self, cache):
         grads = {}
 
-        # gradients for the output layer
+        # Gradients for the output layer
         lastLayer = str(self.numLayers-1)
         grads['dA' + lastLayer] = - (np.divide(self.trainingLabels, cache['A' + lastLayer]) - np.divide(1 - self.trainingLabels, 1 - cache['A' + lastLayer]))
         grads['dZ' + lastLayer] = cache['A' + lastLayer] - self.trainingLabels
         grads['dW' + lastLayer] = np.dot(grads['dZ' + lastLayer], cache['A' + str(int(lastLayer) - 1)].T) / self.trainingSize
         grads['db' + lastLayer] = np.sum(grads['dZ' + lastLayer], axis = 1, keepdims = True) / self.trainingSize
 
-        # gradients for the rest of the hidden layers
+        # Gradients for the rest of the hidden layers
         for i in range(self.numLayers - 2, 0, -1):
             grads['dA' + str(i)] = np.dot(cache['W' + str(i+1)].T,grads['dZ' + str(i+1)])
             grads['dZ' + str(i)] = np.dot(cache['W' + str(i+1)].T,grads['dZ' + str(i+1)]) * getattr(self, self.activation)(cache['A' + str(i)], grads['dA' + str(i)])
@@ -154,7 +154,7 @@ class NeuralNetwork(object):
         return optimized
 
     ''' Main model with everything to train our NN '''
-    def train(self, iterations = 10000, learningRate = 1.2):
+    def train(self, iterations, learningRate):
 
         if iterations < 1000:
             raise Exception("Please pick a higher number of iterations.")
@@ -191,8 +191,8 @@ class NeuralNetwork(object):
         else:
             self.cache = self.forwardPass()
             predictions = np.where(self.cache['A' + str(self.numLayers-1)] > 0.5, 1., 0.)
-            acc = float((np.dot(self.trainingLabels, predictions.T) + np.dot(1 - self.trainingLabels,1 - predictions.T)))
+            acc = float((np.dot(self.trainingLabels, predictions.T) + np.dot(1 - self.trainingLabels, 1 - predictions.T)))
             acc /= float(self.trainingLabels.size)
             acc *= 100
-            print("Accuracy on training Set: " + str(acc) + "%")
+            print("Accuracy on the training Set: " + str(acc) + "%")
 
