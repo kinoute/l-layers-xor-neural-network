@@ -43,7 +43,7 @@ class NeuralNetwork(object):
 
     def tanH(self, Z, derivative = None):
         if derivative is not None:
-            return 1 - np.square(np.tanh(Z))
+            return 1 - np.square(Z)
         else:
             return np.tanh(Z)
 
