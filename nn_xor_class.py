@@ -35,26 +35,26 @@ class NeuralNetwork(object):
         return np.dot(W, X) + b
 
     ''' Activation functions '''
-    def sigmoid(self, Z, derivative = None):
-        if derivative is not None:
+    def sigmoid(self, Z, derivative = False):
+        if derivative:
             return Z * (1 - Z)
         else:
             return 1 / (1 + np.exp(-Z))
 
-    def tanH(self, Z, derivative = None):
-        if derivative is not None:
+    def tanH(self, Z, derivative = False):
+        if derivative:
             return 1 - np.square(Z)
         else:
             return np.tanh(Z)
 
-    def relu(self, Z, derivative = None):
-        if  derivative is not None:
+    def relu(self, Z, derivative = False):
+        if  derivative:
             return (Z > 0).astype(float)
         else:
             return np.maximum(0, Z)
 
-    def leakyRelu(self, Z, derivative = None):
-        if derivative is not None:
+    def leakyRelu(self, Z, derivative = False):
+        if derivative:
             return np.clip(Z > 0, 0.01, 1.0)
         else:
             return np.where(Z > 0, Z, Z * 0.01)
@@ -84,6 +84,11 @@ class NeuralNetwork(object):
         # Add the output layer dimension at the end
         self.numUnits.append(1)
 
+    ''' Get Heuristic depending of the activation function '''
+    def getHeuristic(self):
+        return
+
+
     ''' Initialize our parameters (weights and biais) '''
     def initializeParameters(self):
 
@@ -91,12 +96,12 @@ class NeuralNetwork(object):
 
         # Create weights and biais for each hidden layers
         for i in range(1, self.numLayers):
-            parameters['W' + str(i)] = np.random.randn(self.numUnits[i], self.numUnits[i-1])
-            parameters['b' + str(i)] = np.ones((self.numUnits[i], 1))
+            parameters[f'W{i}'] = np.random.randn(self.numUnits[i], self.numUnits[i-1])
+            parameters[f'b{i}'] = np.ones((self.numUnits[i], 1))
 
         # Create weight and biais for the final output layer
-        parameters['W' + str(self.numLayers)] = np.random.randn(1, self.numUnits[-2])
-        parameters['b' + str(self.numLayers)] = np.ones((1,1))
+        parameters[f'W{self.numLayers}'] = np.random.randn(1, self.numUnits[-2])
+        parameters[f'b{self.numLayers}'] = np.ones((1,1))
 
         return parameters
 
@@ -107,18 +112,18 @@ class NeuralNetwork(object):
 
         # go through all the hidden layers
         for i in range(1, self.numLayers-1):
-            cache['W' + str(i)] = self.parameters['W' + str(i)]
-            cache['b' + str(i)] = self.parameters['b' + str(i)]
-            cache['Z' + str(i)] = self.preActivation(cache['W' + str(i)], cache['A' + str(i-1)], cache['b' + str(i)])
-            cache['A' + str(i)] = getattr(self, self.activation)(cache['Z' + str(i)])
+            cache[f'W{i}'] = self.parameters[f'W{i}']
+            cache[f'b{i}'] = self.parameters[f'b{i}']
+            cache[f'Z{i}'] = self.preActivation(cache[f'W{i}'], cache[f'A{i-1}'], cache[f'b{i}'])
+            cache[f'A{i}'] = getattr(self, self.activation)(cache[f'Z{i}'])
 
         # output layer
-        cache['W' + str(self.numLayers-1)] = self.parameters['W' + str(self.numLayers-1)]
-        cache['b' + str(self.numLayers-1)] = self.parameters['b' + str(self.numLayers-1)]
-        cache['Z' + str(self.numLayers-1)] = self.preActivation(self.parameters['W' + str(self.numLayers-1)],
-                                                cache['A' + str(self.numLayers-2)],
-                                                self.parameters['b' + str(self.numLayers-1)])
-        cache['A' + str(self.numLayers-1)] = self.sigmoid(cache['Z' + str(self.numLayers-1)])
+        cache[f'W{self.numLayers-1}'] = self.parameters[f'W{self.numLayers-1}']
+        cache[f'b{self.numLayers-1}'] = self.parameters[f'b{self.numLayers-1}']
+        cache[f'Z{self.numLayers-1}'] = self.preActivation(self.parameters[f'W{self.numLayers-1}'],
+                                                cache[f'A{self.numLayers-2}'],
+                                                self.parameters[f'b{self.numLayers-1}'])
+        cache[f'A{self.numLayers-1}'] = self.sigmoid(cache[f'Z{self.numLayers-1}'])
 
         return cache
 
@@ -127,18 +132,19 @@ class NeuralNetwork(object):
         grads = {}
 
         # Gradients for the output layer
-        lastLayer = str(self.numLayers-1)
-        grads['dA' + lastLayer] = - (np.divide(self.trainingLabels, cache['A' + lastLayer]) - np.divide(1 - self.trainingLabels, 1 - cache['A' + lastLayer]))
-        grads['dZ' + lastLayer] = cache['A' + lastLayer] - self.trainingLabels
-        grads['dW' + lastLayer] = np.dot(grads['dZ' + lastLayer], cache['A' + str(int(lastLayer) - 1)].T) / self.trainingSize
-        grads['db' + lastLayer] = np.sum(grads['dZ' + lastLayer], axis = 1, keepdims = True) / self.trainingSize
+        lastLayer = self.numLayers - 1
+        grads[f'dA{lastLayer}'] = - (np.divide(self.trainingLabels, cache[f'A{lastLayer}']) - np.divide(1 - self.trainingLabels, 1 - cache[f'A{lastLayer}']))
+        grads[f'dZ{lastLayer}'] = cache[f'A{lastLayer}'] - self.trainingLabels
+        grads[f'dW{lastLayer}'] = np.dot(grads[f'dZ{lastLayer}'], cache[f'A{lastLayer - 1}'].T) / self.trainingSize
+        grads[f'db{lastLayer}'] = np.sum(grads[f'dZ{lastLayer}'], axis = 1, keepdims = True) / self.trainingSize
 
         # Gradients for the rest of the hidden layers
         for i in range(self.numLayers - 2, 0, -1):
-            grads['dA' + str(i)] = np.dot(cache['W' + str(i+1)].T,grads['dZ' + str(i+1)])
-            grads['dZ' + str(i)] = np.dot(cache['W' + str(i+1)].T,grads['dZ' + str(i+1)]) * getattr(self, self.activation)(cache['A' + str(i)], grads['dA' + str(i)])
-            grads['dW' + str(i)] = np.dot(grads['dZ' + str(i)], cache['A' + str(i-1)].T) / self.trainingSize
-            grads['db' + str(i)] = np.sum(grads['dZ' + str(i)], axis=1, keepdims=True) / self.trainingSize
+            grads[f'dA{i}'] = np.dot(cache[f'W{i+1}'].T,grads[f'dZ{i+1}'])
+            grads[f'dZ{i}'] = np.dot(cache[f'W{i+1}'].T,grads[f'dZ{i+1}'])
+            grads[f'dZ{i}'] *= getattr(self, self.activation)(cache[f'A{i}'], True)
+            grads[f'dW{i}'] = np.dot(grads[f'dZ{i}'], cache[f'A{i-1}'].T) / self.trainingSize
+            grads[f'db{i}'] = np.sum(grads[f'dZ{i}'], axis=1, keepdims=True) / self.trainingSize
 
         return grads
 
@@ -148,8 +154,8 @@ class NeuralNetwork(object):
         optimized = {}
 
         for i in range(1, self.numLayers):
-            optimized['W' + str(i)] = cache['W' + str(i)] - learningRate * grads['dW' + str(i)]
-            optimized['b' + str(i)] = cache['b' + str(i)] - learningRate * grads['db' + str(i)]
+            optimized[f'W{i}'] = cache[f'W{i}'] - learningRate * grads[f'dW{i}']
+            optimized[f'b{i}'] = cache[f'b{i}'] - learningRate * grads[f'db{i}']
 
         return optimized
 
@@ -170,10 +176,10 @@ class NeuralNetwork(object):
             self.cache = self.forwardPass()
 
             # compute cost
-            cost = self.computeCost(self.cache['A' + str(self.numLayers - 1)])
+            cost = self.computeCost(self.cache[f'A{self.numLayers - 1}'])
 
             # print the cost
-            if i % 1000 == 0:
+            if i % 250 == 0:
                 print("Cost ater", i, "iterations:", cost)
 
             # calculate gradients
@@ -190,7 +196,7 @@ class NeuralNetwork(object):
             raise Exception("You have to train your Neural Network first.")
         else:
             self.cache = self.forwardPass()
-            predictions = np.where(self.cache['A' + str(self.numLayers-1)] > 0.5, 1., 0.)
+            predictions = np.where(self.cache[f'A{self.numLayers-1}'] > 0.5, 1., 0.)
             acc = float((np.dot(self.trainingLabels, predictions.T) + np.dot(1 - self.trainingLabels, 1 - predictions.T)))
             acc /= float(self.trainingLabels.size)
             acc *= 100
