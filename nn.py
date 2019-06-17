@@ -27,8 +27,8 @@ parser.add_argument('-i', '--iterations', type=int,
 
 # Define our learning Rate
 parser.add_argument('-r', '--learning-rate', type=float,
-                    help="Pick a Learning rate for your neural Network. Default: 0.5.",
-                    action="store", default=0.5)
+                    help="Pick a Learning rate for your neural Network. Default: 1.5.",
+                    action="store", default=1.5)
 
 # Activation function for hidden layers (minus the output layer)
 parser.add_argument('-a', '--activation',

@@ -35,29 +35,37 @@ class NeuralNetwork(object):
         return np.dot(W, X) + b
 
     ''' Activation functions '''
-    def sigmoid(self, Z, derivative = False):
+    def sigmoid(self, F, derivative = False, heuristic = False):
         if derivative:
-            return Z * (1 - Z)
+            return F * (1 - F)
+        elif heuristic:
+            return np.sqrt(1 / heuristic)
         else:
-            return 1 / (1 + np.exp(-Z))
+            return 1 / (1 + np.exp(-F))
 
-    def tanH(self, Z, derivative = False):
+    def tanH(self, F, derivative = False, heuristic = False):
         if derivative:
-            return 1 - np.square(Z)
+            return 1 - np.square(F)
+        elif heuristic:
+            return np.sqrt(1 / heuristic)
         else:
-            return np.tanh(Z)
+            return np.tanh(F)
 
-    def relu(self, Z, derivative = False):
+    def relu(self, F, derivative = False, heuristic = False):
         if  derivative:
-            return (Z > 0).astype(float)
+            return (F > 0).astype(float)
+        elif heuristic:
+            return np.sqrt(2 / heuristic)
         else:
-            return np.maximum(0, Z)
+            return np.maximum(0, F)
 
-    def leakyRelu(self, Z, derivative = False):
+    def leakyRelu(self, F, derivative = False, heuristic = False):
         if derivative:
-            return np.clip(Z > 0, 0.01, 1.0)
+            return np.clip(F > 0, 0.01, 1.0)
+        elif heuristic:
+            return np.sqrt(2 / heuristic)
         else:
-            return np.where(Z > 0, Z, Z * 0.01)
+            return np.where(F > 0, F, F * 0.01)
 
     ''' Loss and Cost functions '''
     def computeLoss(self, A):
@@ -84,23 +92,18 @@ class NeuralNetwork(object):
         # Add the output layer dimension at the end
         self.numUnits.append(1)
 
-    ''' Get Heuristic depending of the activation function '''
-    def getHeuristic(self):
-        return
-
-
     ''' Initialize our parameters (weights and biais) '''
     def initializeParameters(self):
 
         parameters = {}
 
-        # Create weights and biais for each hidden layers
+        # Create weights and biais for each hidden layers with heuristic
         for i in range(1, self.numLayers):
-            parameters[f'W{i}'] = np.random.randn(self.numUnits[i], self.numUnits[i-1])
+            parameters[f'W{i}'] = np.random.randn(self.numUnits[i], self.numUnits[i-1]) * getattr(self, self.activation)(None, heuristic = self.numUnits[i-1])
             parameters[f'b{i}'] = np.ones((self.numUnits[i], 1))
 
-        # Create weight and biais for the final output layer
-        parameters[f'W{self.numLayers}'] = np.random.randn(1, self.numUnits[-2])
+        # Create weight and biais for the final output layer with heuristic
+        parameters[f'W{self.numLayers}'] = np.random.randn(1, self.numUnits[-2]) * self.sigmoid(None, heuristic = self.numUnits[i-1])
         parameters[f'b{self.numLayers}'] = np.ones((1,1))
 
         return parameters
@@ -111,7 +114,7 @@ class NeuralNetwork(object):
         cache['A0'] = self.trainingSet
 
         # go through all the hidden layers
-        for i in range(1, self.numLayers-1):
+        for i in range(1, self.numLayers - 1):
             cache[f'W{i}'] = self.parameters[f'W{i}']
             cache[f'b{i}'] = self.parameters[f'b{i}']
             cache[f'Z{i}'] = self.preActivation(cache[f'W{i}'], cache[f'A{i-1}'], cache[f'b{i}'])
@@ -120,9 +123,7 @@ class NeuralNetwork(object):
         # output layer
         cache[f'W{self.numLayers-1}'] = self.parameters[f'W{self.numLayers-1}']
         cache[f'b{self.numLayers-1}'] = self.parameters[f'b{self.numLayers-1}']
-        cache[f'Z{self.numLayers-1}'] = self.preActivation(self.parameters[f'W{self.numLayers-1}'],
-                                                cache[f'A{self.numLayers-2}'],
-                                                self.parameters[f'b{self.numLayers-1}'])
+        cache[f'Z{self.numLayers-1}'] = self.preActivation(self.parameters[f'W{self.numLayers-1}'], cache[f'A{self.numLayers-2}'], self.parameters[f'b{self.numLayers-1}'])
         cache[f'A{self.numLayers-1}'] = self.sigmoid(cache[f'Z{self.numLayers-1}'])
 
         return cache
@@ -134,17 +135,16 @@ class NeuralNetwork(object):
         # Gradients for the output layer
         lastLayer = self.numLayers - 1
         grads[f'dA{lastLayer}'] = - (np.divide(self.trainingLabels, cache[f'A{lastLayer}']) - np.divide(1 - self.trainingLabels, 1 - cache[f'A{lastLayer}']))
-        grads[f'dZ{lastLayer}'] = cache[f'A{lastLayer}'] - self.trainingLabels
+        grads[f'dZ{lastLayer}'] = cache[f'A{lastLayer}'] - self.trainingLabels # because we have a sigmoid as output
         grads[f'dW{lastLayer}'] = np.dot(grads[f'dZ{lastLayer}'], cache[f'A{lastLayer - 1}'].T) / self.trainingSize
         grads[f'db{lastLayer}'] = np.sum(grads[f'dZ{lastLayer}'], axis = 1, keepdims = True) / self.trainingSize
 
         # Gradients for the rest of the hidden layers
         for i in range(self.numLayers - 2, 0, -1):
             grads[f'dA{i}'] = np.dot(cache[f'W{i+1}'].T,grads[f'dZ{i+1}'])
-            grads[f'dZ{i}'] = np.dot(cache[f'W{i+1}'].T,grads[f'dZ{i+1}'])
-            grads[f'dZ{i}'] *= getattr(self, self.activation)(cache[f'A{i}'], True)
+            grads[f'dZ{i}'] = grads[f'dA{i}'] * getattr(self, self.activation)(cache[f'A{i}'], derivative = True)
             grads[f'dW{i}'] = np.dot(grads[f'dZ{i}'], cache[f'A{i-1}'].T) / self.trainingSize
-            grads[f'db{i}'] = np.sum(grads[f'dZ{i}'], axis=1, keepdims=True) / self.trainingSize
+            grads[f'db{i}'] = np.sum(grads[f'dZ{i}'], axis = 1, keepdims = True) / self.trainingSize
 
         return grads
 
@@ -200,5 +200,5 @@ class NeuralNetwork(object):
             acc = float((np.dot(self.trainingLabels, predictions.T) + np.dot(1 - self.trainingLabels, 1 - predictions.T)))
             acc /= float(self.trainingLabels.size)
             acc *= 100
-            print("Accuracy on the training Set: " + str(acc) + "%")
+            print(f"Accuracy on the Training Set: {acc}%")
 
