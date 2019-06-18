@@ -97,7 +97,7 @@ class NeuralNetwork(object):
 
         parameters = {}
 
-        # Create weights and biais for each hidden layers with heuristic
+        # Create weights and biais for each hidden layer with heuristic
         for i in range(1, self.numLayers):
             parameters[f'W{i}'] = np.random.randn(self.numUnits[i], self.numUnits[i-1]) * getattr(self, self.activation)(None, heuristic = self.numUnits[i-1])
             parameters[f'b{i}'] = np.ones((self.numUnits[i], 1))

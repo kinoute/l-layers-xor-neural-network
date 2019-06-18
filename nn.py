@@ -7,18 +7,18 @@ parser = argparse.ArgumentParser(description='Train a L-Layer Neural Network on 
 
 # Number of layers
 parser.add_argument('-l', "--layers", type=int,
-                    help="Number of layers in your NN (including input and output layers).  Default: 5.",
-                    action="store", default=5)
+                    help="Number of layers in your NN (including input and output layers).  Default: 4.",
+                    action="store", default=4)
 
 # Number of units for each layer
 parser.add_argument('-u', '--units', type=str,
-                    help="Number of units in each hidden layer separated by a comma (excluding input and output layers). Default: 4,3,2.",
-                    action="store", default="4,3,2")
+                    help="Number of units in each hidden layer separated by a comma (excluding input and output layers). Default: 4,3.",
+                    action="store", default="4,3")
 
 # Size of the dataset
 parser.add_argument('-s', '--size', type=int,
-                    help="How many examples should be generated in our training set. Default: 5000.",
-                    action="store", default=5000)
+                    help="How many examples should be generated in our training set. Default: 1000.",
+                    action="store", default=1000)
 
 # Define our number of iterations
 parser.add_argument('-i', '--iterations', type=int,
@@ -32,8 +32,8 @@ parser.add_argument('-r', '--learning-rate', type=float,
 
 # Activation function for hidden layers (minus the output layer)
 parser.add_argument('-a', '--activation',
-                    help="Activation function for your hidden layers. The output layer will always be a sigmoid. Default: sigmoid.",
-                    action="store", choices=["sigmoid", "tanH", "relu", "leakyRelu"], default="sigmoid")
+                    help="Activation function for your hidden layers. The output layer will always be a sigmoid. Default: tanH.",
+                    action="store", choices=["sigmoid", "tanH", "relu", "leakyRelu"], default="tanH")
 
 args = parser.parse_args()
 
