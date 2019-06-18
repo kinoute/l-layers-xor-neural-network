@@ -3,7 +3,7 @@ import argparse
 from nn_xor_class import NeuralNetwork
 
 """ Arguments of the script """
-parser = argparse.ArgumentParser(description='Train a L-Layer Neural Network on XOR dataset with various activation functions.')
+parser = argparse.ArgumentParser(description='Train a L-Layers Neural Network on XOR dataset with various activation functions.')
 
 # Number of layers
 parser.add_argument('-l', "--layers", type=int,
