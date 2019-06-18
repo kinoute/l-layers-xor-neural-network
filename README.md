@@ -25,15 +25,15 @@ python nn.py [-h] [-l LAYERS] [-u UNITS] [-s SIZE] [-i ITERATIONS] [-r LEARNING_
 
   -l LAYERS, --layers LAYERS
                         Number of layers in your NN (including input and
-                        output layers). Default: 5.
+                        output layers). Default: 3.
 
   -u UNITS, --units UNITS
                         Number of units in each hidden layer separated by a
                         comma (excluding input and output layers). Default:
-                        4,3,2.
+                        4,3.
 
   -s SIZE, --size SIZE  How many examples should be generated in our training
-                        set. Default: 5000.
+                        set. Default: 1000.
 
   -i ITERATIONS, --iterations ITERATIONS
                         Choose the number of iterations we want. Default: 10000.
@@ -43,6 +43,6 @@ python nn.py [-h] [-l LAYERS] [-u UNITS] [-s SIZE] [-i ITERATIONS] [-r LEARNING_
 
   -a {sigmoid,tanH,relu,leakyRelu}, --activation {sigmoid,tanH,relu,leakyRelu}
                         Activation function for your hidden layers. The output
-                        layer will always be a sigmoid. Default: "sigmoid".
+                        layer will always be a sigmoid. Default: "tanH".
 
 ```
