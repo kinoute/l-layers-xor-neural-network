@@ -194,11 +194,11 @@ class NeuralNetwork(object):
     def testPrediction(self):
         if self.parameters == None:
             raise Exception("You have to train your Neural Network first.")
-        else:
-            self.cache = self.forwardPass()
-            predictions = np.where(self.cache[f'A{self.numLayers-1}'] > 0.5, 1., 0.)
-            acc = float((np.dot(self.trainingLabels, predictions.T) + np.dot(1 - self.trainingLabels, 1 - predictions.T)))
-            acc /= float(self.trainingLabels.size)
-            acc *= 100
-            print(f"Accuracy on the Training Set: {acc}%")
+
+        self.cache = self.forwardPass()
+        predictions = np.where(self.cache[f'A{self.numLayers-1}'] > 0.5, 1., 0.)
+        acc = float((np.dot(self.trainingLabels, predictions.T) + np.dot(1 - self.trainingLabels, 1 - predictions.T)))
+        acc /= float(self.trainingLabels.size)
+        acc *= 100
+        print(f"Accuracy on the Training Set: {acc}%")
 
