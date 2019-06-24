@@ -24,13 +24,12 @@ python nn.py [-h] [-l LAYERS] [-u UNITS] [-s SIZE] [-i ITERATIONS] [-r LEARNING_
   -h, --help            show this help message and exit
 
   -l LAYERS, --layers LAYERS
-                        Number of layers in your NN (including input and
-                        output layers). Default: 3.
+                        Number of layers in your NN (including the output layer). Default: 4.
 
   -u UNITS, --units UNITS
                         Number of units in each hidden layer separated by a
-                        comma (excluding input and output layers). Default:
-                        4,3.
+                        comma (including output layer). Default:
+                        4,2,1.
 
   -s SIZE, --size SIZE  How many examples should be generated in our training
                         set. Default: 1000.
