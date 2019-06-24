@@ -7,13 +7,13 @@ parser = argparse.ArgumentParser(description='Train a L-Layers Neural Network on
 
 # Number of layers
 parser.add_argument('-l', "--layers", type=int,
-                    help="Number of layers in your NN (including input and output layers).  Default: 4.",
+                    help="Number of layers in your NN (including the output layer).  Default: 4.",
                     action="store", default=4)
 
 # Number of units for each layer
 parser.add_argument('-u', '--units', type=str,
-                    help="Number of units in each hidden layer separated by a comma (excluding input and output layers). Default: 4,3.",
-                    action="store", default="4,3")
+                    help="Number of units in each hidden layer separated by a comma (including output layer). Default: 4,2,1.",
+                    action="store", default="4,2,1")
 
 # Size of the dataset
 parser.add_argument('-s', '--size', type=int,

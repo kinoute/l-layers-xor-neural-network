@@ -17,7 +17,7 @@ class NeuralNetwork(object):
         self.activation = activation
 
         # Don't do anything if the number of hidden units doesn't match the hidden layers
-        if len(self.numUnits) != self.numLayers - 2:
+        if len(self.numUnits) != self.numLayers - 1:
             raise Exception("The number of hidden units should be equal to the number of total layers minus 2 (input and output layers).")
 
     ''' Display the NN configuration at the beginning '''
